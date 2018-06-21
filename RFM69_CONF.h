@@ -5,6 +5,8 @@
 
 #define RFM_FSTEP 61
 
+#define RFM_FXOSC 32000000
+
 #include <Arduino.h>
 #include <RFM69registers.h>
 
@@ -39,6 +41,10 @@ class RFM69Config
     RFM69Config();
 
     const uint8_t getRegisterVal(uint8_t rfm_register, RegisterIndex value);
+
+    void writeBitrate(uint16_t targetBitrate);
+
+    void writeFrequencyDeviation(uint16_t targetFreqDev);
 
     void writeCarrierFrequency(uint32_t targetFrequency);
 
@@ -168,6 +174,8 @@ class RFM69Config
         { 255, 255 }   // Terminator
     };
 
+    uint16_t bitrate = 0;
+    uint16_t frequencyDeviation = 0;
     uint32_t centerFrequency = 0;
 
     void splitWord(uint8_t* wordBytes, uint8_t wordByteCount, uint64_t word);

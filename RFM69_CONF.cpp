@@ -17,6 +17,38 @@ const uint8_t RFM69Config::getRegisterVal(uint8_t rfm_register, RegisterIndex id
     return registerConfig[rfm_register][idx];
 }
 
+void RFM69Config::writeBitrate(uint16_t targetBitrate)
+{
+    bitrate = targetBitrate;
+    uint16_t br = RFM_FXOSC / bitrate;
+
+    uint8_t bitrateBytes[2] = { 0, 0 };
+
+    RFM69Config::splitWord(bitrateBytes, 2, bitrate);
+
+    for (int i = 0; i < 2; i++)
+    {
+        RFM69Config::registerConfig[i + REG_BITRATEMSB][RegisterIndex::VALUE] = bitrateBytes[i];
+        RFM69Config::registerConfig[i + REG_BITRATEMSB][RegisterIndex::WILL_WRITE] = 1;
+    }
+}
+
+void RFM69Config::writeFrequencyDeviation(uint16_t targetFreqDev)
+{
+    frequencyDeviation = targetFreqDev;
+    uint16_t br = frequencyDeviation / RFM_FSTEP;
+
+    uint8_t fDevBytes[2] = { 0, 0 };
+
+    RFM69Config::splitWord(fDevBytes, 2, frequencyDeviation);
+
+    for (int i = 0; i < 2; i++)
+    {
+        RFM69Config::registerConfig[i + REG_FDEVMSB][RegisterIndex::VALUE] = fDevBytes[i];
+        RFM69Config::registerConfig[i + REG_FDEVMSB][RegisterIndex::WILL_WRITE] = 1;
+    }
+}
+
 
 // No checking for valid frequency ranges is done
 // It's up to you to use the correct values
@@ -74,9 +106,8 @@ void RFM69Config::writeSyncWord(uint8_t syncWordByteCount, uint64_t syncWord)
 // Allow 0-7 bits of error tolerance in the sync word
 void RFM69Config::writeSyncWordErrorTolerance(SyncWordErrorTolerance errorTol)
 {
-    uint8_t t_reg = RFM69Config::registerConfig[REG_SYNCCONFIG][RegisterIndex::VALUE];
-    t_reg = t_reg & 0xF8 | errorTol;
-    RFM69Config::registerConfig[REG_SYNCCONFIG][RegisterIndex::VALUE] = t_reg;
+    RFM69Config::registerConfig[REG_SYNCCONFIG][RegisterIndex::VALUE] =
+        RFM69Config::registerConfig[REG_SYNCCONFIG][RegisterIndex::VALUE] & 0xF8 | errorTol;
 }
 
 void RFM69Config::writeAESKey(uint64_t AES_MSB, uint64_t AES_LSB)
@@ -101,7 +132,6 @@ void RFM69Config::writeAESKey(uint64_t AES_MSB, uint64_t AES_LSB)
 void RFM69Config::splitWord(uint8_t* wordBytes, uint8_t wordByteCount, uint64_t word)
 {
     for (int i = 0; i < wordByteCount; i++)
-        wordBytes[i] = (word >> ((wordByteCount - i - 1) * 8)) & 0xFF;
-        // Index 0 contains most significant byte
+        wordBytes[i] = (word >> ((wordByteCount - i - 1) * 8)) & 0xFF; // Truncate
 }
 
