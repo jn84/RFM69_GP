@@ -1,24 +1,58 @@
 #ifndef RFM69_CONF_H
 #define RFM69_CONF_H
 
-#define VALUE 0
-#define WILL_WRITE 1
-
 #define REGISTER_COUNT 0x71
+
+#define RFM_FSTEP 61
 
 #include <Arduino.h>
 #include <RFM69registers.h>
 
-class RFM69Config 
+enum RegisterIndex : uint8_t 
+{ 
+    VALUE = 0, 
+    WILL_WRITE = 1 
+};
+
+enum SyncWordErrorTolerance : uint8_t
+{
+    TOL_0 = 0x00,
+    TOL_1 = 0x01,
+    TOL_2 = 0x02,
+    TOL_3 = 0x03,
+    TOL_4 = 0x04,
+    TOL_5 = 0x05,
+    TOL_6 = 0x06,
+    TOL_7 = 0x07,
+};
+
+enum SyncEnable : uint8_t 
+{
+    DISABLE = 0x00,
+    ENABLE = 0x80
+};
+
+class RFM69Config
 {
     public:
 
     RFM69Config();
 
-    const uint8_t getConfigVal(uint8_t rfm_register, uint8_t value);
+    const uint8_t getRegisterVal(uint8_t rfm_register, RegisterIndex value);
+
+    void writeCarrierFrequency(uint32_t targetFrequency);
+
+    void writeSyncEnable(SyncEnable isSyncEnabled);
+    void writeSyncWord(uint8_t syncWordByteCount, uint64_t syncWord);
+    void writeSyncWordErrorTolerance(SyncWordErrorTolerance errorTol);
+
+    void writeAESKey(uint64_t AES_MSB, uint64_t AES_LSB);
 
     private:
-    uint8_t RegisterConfig[REGISTER_COUNT][2] = {                                                                   // Use defaults from base RFM69
+    
+
+
+    uint8_t registerConfig[REGISTER_COUNT][2] = {                                                                   // Use defaults from base RFM69
         { 0, 0 },                                                                                                   // 0x00 : REG_FIFO
         { RF_OPMODE_SEQUENCER_ON | RF_OPMODE_LISTEN_OFF | RF_OPMODE_STANDBY, 1 },                                   // 0x01 : REG_OPMODE
         { RF_DATAMODUL_DATAMODE_PACKET | RF_DATAMODUL_MODULATIONTYPE_FSK | RF_DATAMODUL_MODULATIONSHAPING_00, 1 },  // 0x02 : REG_DATAMODUL
@@ -26,9 +60,9 @@ class RFM69Config
         { RF_BITRATELSB_55555, 1 },                                                                                 // 0x04 : REG_BITRATELSB
         { RF_FDEVMSB_50000, 1 },                                                                                    // 0x05 : REG_FDEVMSB
         { RF_FDEVLSB_50000, 1 },                                                                                    // 0x06 : REG_FDEVLSB
-        { RF_FRFMSB_915, 1 },                                                                                       // 0x07 : REG_FRFMSB
-        { RF_FRFMID_915, 1 },                                                                                       // 0x08 : REG_FRFMID
-        { RF_FRFLSB_915, 1 },                                                                                       // 0x09 : REG_FRFLSB
+        { 0, 1 },                                                                                                   // 0x07 : REG_FRFMSB
+        { 0, 1 },                                                                                                   // 0x08 : REG_FRFMID
+        { 0, 1 },                                                                                                   // 0x09 : REG_FRFLSB
         { 0, 0 },                                                                                                   // 0x0A : REG_OSC1
         { 0, 0 },                                                                                                   // 0x0B : REG_AFCCTRL
         { 0, 0 },                                                                                                   // 0x0C : REG_LOWBAT
@@ -134,7 +168,9 @@ class RFM69Config
         { 255, 255 }   // Terminator
     };
 
-    void splitSyncWord(uint8_t* syncBytes, uint8_t syncByteCount, uint64_t syncWord);
+    uint32_t centerFrequency = 0;
+
+    void splitWord(uint8_t* wordBytes, uint8_t wordByteCount, uint64_t word);
 
 
 };
