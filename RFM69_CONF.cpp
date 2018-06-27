@@ -68,7 +68,7 @@ void RFM69Config::writeCarrierFrequency(uint32_t targetFrequency)
 
     uint32_t Frf = centerFrequency / RFM_FSTEP;
 
-    uint8_t centerFrequencyBytes[3] = {};
+    uint8_t centerFrequencyBytes[3] = { 0, 0, 0 };
 
     RFM69Config::splitWord(centerFrequencyBytes, 3, Frf);
 

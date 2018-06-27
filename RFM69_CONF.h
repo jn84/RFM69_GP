@@ -34,6 +34,63 @@ enum SyncEnable : uint8_t
     ENABLE = 0x80
 };
 
+enum OperatingMode : uint8_t
+{
+    SLEEP      = RF_OPMODE_SLEEP       ,
+    STANDBY    = RF_OPMODE_STANDBY     ,
+    FREQ_SYNTH = RF_OPMODE_SYNTHESIZER ,
+    TRANSMIT   = RF_OPMODE_TRANSMITTER ,
+    RECEIVE    = RF_OPMODE_RECEIVER    
+};
+
+enum ListenMode : uint8_t
+{
+    OFF = RF_OPMODE_LISTEN_OFF,
+    ON = RF_OPMODE_LISTEN_ON
+};
+
+enum DataMode : uint8_t
+{
+    PACKET = RF_DATAMODUL_DATAMODE_PACKET,
+    CONTINUOUS = RF_DATAMODUL_DATAMODE_CONTINUOUS,
+    CONTINUOUS_NOBITSYNC = RF_DATAMODUL_DATAMODE_CONTINUOUSNOBSYNC
+};
+
+enum ModulationType : uint8_t
+{
+    FSK = RF_DATAMODUL_MODULATIONTYPE_FSK,
+    OOK = RF_DATAMODUL_MODULATIONTYPE_OOK
+};
+
+enum ModulationShapingFSK : uint8_t
+{
+    NONE = 0x00,
+    GUASSIAN_BT1_0 = 0x01,
+    GUASSIAN_BT0_5 = 0x02,
+    GUASSIAN_BT0_3 = 0x03,
+};
+
+enum ModulationShapingFSK : uint8_t
+{
+    NONE = 0x00,
+    GUASSIAN_BT1_0 = 0x01,
+    GUASSIAN_BT0_5 = 0x02,
+    GUASSIAN_BT0_3 = 0x03
+};
+
+enum ModulationShapingOOK : uint8_t
+{
+    NONE = 0x00,
+    FCUTOFF_1BITRATE = 0x01,
+    FCUTOFF_2BITRATE = 0x02
+};
+
+enum AFCLowBeta : uint8_t
+{
+    STANDARD = RF_AFCCTRL_LOWBETA_OFF,
+    IMPROVED = RF_AFCCTRL_LOWBETA_ON
+};
+
 class RFM69Config
 {
     public:
@@ -42,11 +99,63 @@ class RFM69Config
 
     const uint8_t getRegisterVal(uint8_t rfm_register, RegisterIndex value);
 
+    uint8_t &operator[] (uint8_t);
+
+    void writeOperationMode(OperatingMode mode);
+    // void writeListenMode(ListenMode mode);
+    // void abortListen();
+
+    void writeDataMode(DataMode mode);
+    void writeModulationType(ModulationType modType);
+    void writeModulationShapingFSK(ModulationShapingFSK shaping);
+    void writeModulationShapingOOK(ModulationShapingOOK shaping);
+
     void writeBitrate(uint16_t targetBitrate);
-
     void writeFrequencyDeviation(uint16_t targetFreqDev);
-
     void writeCarrierFrequency(uint32_t targetFrequency);
+
+    // RC Calibration in base class: rcCalibration()
+
+    // Automatic Frequency Control
+    void writeAFCLowBeta(AFCLowBeta afc);
+
+    // void writeListenIdleTimeResolution();
+    // void writeListenRXTimeResolution();
+    // void writeListenPacketAcceptCriteria();
+    // void writeListenEndAction();
+    //// ListenIdleTime = ListenIdleTimeResolution * ListenIdleDurationCoefficient
+    // void writeListenIdleDurationCoefficient(); 
+    //// ListenRXTime = ListenRXTimeResolution * ListenRXDurationCoefficient
+    // void writeListenRXDurationCoefficient();
+
+    // uint8_t readChipVersion();
+
+    // writePowerLevel(); // In Base RFM69 : setPowerLevel(...)
+
+    //// Control TX power amplifier ramp time 
+    // void writePaRamp();
+
+    // void writePAOvercurrentProtect(); // Handled in Base RFM69
+    // void writePAOCPTrim(uint8_t); // 95 mA default
+
+    // Low Noise Amplifier
+    // void writeLNAInputImpedance();
+    // void writeLNACurrentGain();
+    // void writeLNAGainSelect();
+
+    // RXBW : 
+
+    // AFCBW :
+
+    // OOK Demodulation Config
+    // void writeOOKThresholdType();
+    // void writeOOKPeakThesholdStep();
+    // void writeOOKPeakThresholdPeriod();
+
+    // void writeOOKAverageThresholdFilterCoeff();
+
+    // void writeOOKFixedThreshold();
+
 
     void writeSyncEnable(SyncEnable isSyncEnabled);
     void writeSyncWord(uint8_t syncWordByteCount, uint64_t syncWord);
@@ -55,8 +164,6 @@ class RFM69Config
     void writeAESKey(uint64_t AES_MSB, uint64_t AES_LSB);
 
     private:
-    
-
 
     uint8_t registerConfig[REGISTER_COUNT][2] = {                                                                   // Use defaults from base RFM69
         { 0, 0 },                                                                                                   // 0x00 : REG_FIFO
@@ -70,7 +177,7 @@ class RFM69Config
         { 0, 1 },                                                                                                   // 0x08 : REG_FRFMID
         { 0, 1 },                                                                                                   // 0x09 : REG_FRFLSB
         { 0, 0 },                                                                                                   // 0x0A : REG_OSC1
-        { 0, 0 },                                                                                                   // 0x0B : REG_AFCCTRL
+        { 0, 0 },                                                                                                   // 0x0x : REG_AFCCTRL
         { 0, 0 },                                                                                                   // 0x0C : REG_LOWBAT
         { 0, 0 },                                                                                                   // 0x0D : REG_LISTEN1
         { 0, 0 },                                                                                                   // 0x0E : REG_LISTEN2

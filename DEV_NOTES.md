@@ -38,3 +38,11 @@ Per the datasheet: To ensure a proper modulation, the following limit applies:
                     ß : modulation index
                     ß = (2 * FDEV) / BITRATE
                     0.5 <= ß <= 10
+
+In RFM69 base class we see:
+ For read operations: SPI.transfer(REG_FIFO & 0x7F);
+ For write operations: SPI.transfer(REG_FIFO | 0x80);
+    These values appear to be essentially hardcoded, but handles cases where REG_FIFO changes (will it ever?)
+    Why: The SPI interface of the RFM69* chips look at bit 7 (wnr) to determine if the
+        incoming operations are read or write access. See: 5.2.1. SPI Interface
+
